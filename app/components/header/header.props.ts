@@ -1,3 +1,4 @@
+import React from "react"
 import { ViewStyle, TextStyle } from "react-native"
 import { IconTypes } from "../icon/icons"
 
@@ -16,6 +17,10 @@ export interface HeaderProps {
    * Icon that should appear on the left
    */
   leftIcon?: IconTypes
+
+  renderLeft?: React.FC<{}>
+  renderMid?: React.FC<{}>
+  renderRight?: React.FC<{}>
 
   /**
    * What happens when you press the left icon

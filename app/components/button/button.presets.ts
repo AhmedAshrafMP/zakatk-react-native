@@ -7,9 +7,10 @@ import { color, spacing } from "../../theme"
 const BASE_VIEW: ViewStyle = {
   paddingVertical: spacing[2],
   paddingHorizontal: spacing[2],
-  borderRadius: 4,
+
   justifyContent: "center",
   alignItems: "center",
+  position: "relative",
 }
 
 const BASE_TEXT: TextStyle = {
@@ -25,7 +26,7 @@ export const viewPresets = {
   /**
    * A smaller piece of secondard information.
    */
-  primary: { ...BASE_VIEW, backgroundColor: color.palette.orange } as ViewStyle,
+  primary: { ...BASE_VIEW } as ViewStyle,
 
   /**
    * A button without extras.
@@ -39,9 +40,16 @@ export const viewPresets = {
 }
 
 export const textPresets = {
-  primary: { ...BASE_TEXT, fontSize: 9, color: color.palette.white } as TextStyle,
+  primary: {
+    ...BASE_TEXT,
+    fontSize: 15,
+    color: color.palette.white,
+    fontWeight: "800",
+    textAlign: "left",
+  } as TextStyle,
   link: {
     ...BASE_TEXT,
+    fontSize: 13,
     color: color.text,
     paddingHorizontal: 0,
     paddingVertical: 0,

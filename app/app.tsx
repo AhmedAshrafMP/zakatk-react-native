@@ -11,7 +11,10 @@
  */
 import "./i18n"
 import "./utils/ignore-warnings"
+import "react-native-url-polyfill/auto"
+
 import React, { useState, useEffect, useRef } from "react"
+import { I18nManager } from "react-native"
 import { NavigationContainerRef } from "@react-navigation/native"
 import { SafeAreaProvider, initialWindowSafeAreaInsets } from "react-native-safe-area-context"
 import * as storage from "./utils/storage"
@@ -27,7 +30,7 @@ import { RootStore, RootStoreProvider, setupRootStore } from "./models"
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
 // https://github.com/kmagiera/react-native-screens#using-native-stack-navigator
-import { enableScreens } from 'react-native-screens'
+import { enableScreens } from "react-native-screens"
 enableScreens()
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
@@ -36,6 +39,7 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
  * This is the root component of our app.
  */
 function App() {
+  I18nManager.forceRTL(true)
   const navigationRef = useRef<NavigationContainerRef>()
   const [rootStore, setRootStore] = useState<RootStore | undefined>(undefined)
 
@@ -48,7 +52,7 @@ function App() {
 
   // Kick off initial async loading actions, like loading fonts and RootStore
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       setupRootStore().then(setRootStore)
     })()
   }, [])

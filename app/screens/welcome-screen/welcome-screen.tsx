@@ -1,116 +1,198 @@
-import React from "react"
-import { View, Image, ViewStyle, TextStyle, ImageStyle, SafeAreaView } from "react-native"
-import { useNavigation } from "@react-navigation/native"
+/* eslint-disable camelcase */
 import { observer } from "mobx-react-lite"
-import { Button, Header, Screen, Text, Wallpaper } from "../../components"
-import { color, spacing, typography } from "../../theme"
-const bowserLogo = require("./bowser.png")
+import React from "react"
+import { ViewStyle, Image, ImageStyle, ImageBackground, Dimensions, View } from "react-native"
+import { map } from "rxjs/operators"
+import {
+  Button,
+  ConnectionError,
+  GoBackButton,
+  Header,
+  RenderQuickReplies,
+  RenderTextInput,
+  RestartFlow,
+  Screen,
+} from "../../components"
+import { BotkitWSInstance, SocketMessage, SocketStatus } from "../../services/sockets"
+import { spacing } from "../../theme"
+import { palette } from "../../theme/palette"
 
-const FULL: ViewStyle = { flex: 1 }
-const CONTAINER: ViewStyle = {
-  backgroundColor: color.transparent,
-  paddingHorizontal: spacing[4],
+const WS = BotkitWSInstance.getInstance()
+let welcomeSent = 0
+const ROOT_SCREEN: ViewStyle = {
+  flex: 1,
+  backgroundColor: palette.white,
+  flexDirection: "column",
 }
-const TEXT: TextStyle = {
-  color: color.palette.white,
-  fontFamily: typography.primary,
+
+const PAGE_BACKGROUND_HOLDER: ImageStyle = {
+  width: Dimensions.get("window").width / 2,
+  height: 280,
+  position: "absolute",
+  bottom: 0,
 }
-const BOLD: TextStyle = { fontWeight: "bold" }
-const HEADER: TextStyle = {
-  paddingTop: spacing[3],
-  paddingBottom: spacing[4] + spacing[1],
-  paddingHorizontal: 0,
-}
-const HEADER_TITLE: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 12,
-  lineHeight: 15,
-  textAlign: "center",
-  letterSpacing: 1.5,
-}
-const TITLE_WRAPPER: TextStyle = {
-  ...TEXT,
-  textAlign: "center",
-}
-const TITLE: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 28,
-  lineHeight: 38,
-  textAlign: "center",
-}
-const ALMOST: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 26,
-  fontStyle: "italic",
-}
-const BOWSER: ImageStyle = {
+
+const LEFT_SMALL_LOGO: ImageStyle = {
+  height: 70,
+  width: 70,
   alignSelf: "center",
-  marginVertical: spacing[5],
-  maxWidth: "100%",
 }
-const CONTENT: TextStyle = {
-  ...TEXT,
-  color: "#BAB6C8",
-  fontSize: 15,
-  lineHeight: 22,
-  marginBottom: spacing[5],
+const IMAGE_HOLDER: ViewStyle = {
+  paddingVertical: spacing[2],
 }
-const CONTINUE: ViewStyle = {
-  paddingVertical: spacing[4],
-  paddingHorizontal: spacing[4],
-  backgroundColor: "#5D2555",
+
+const VIEW_HOLDER: ViewStyle = {
+  height: 25,
 }
-const CONTINUE_TEXT: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 13,
-  letterSpacing: 2,
-}
-const FOOTER: ViewStyle = { backgroundColor: "#20162D" }
-const FOOTER_CONTENT: ViewStyle = {
-  paddingVertical: spacing[4],
-  paddingHorizontal: spacing[4],
+
+const SPLASH_HOLDER: ViewStyle = {}
+const SPLASH_IMAGE: ImageStyle = {
+  width: "100%",
+  height: 400,
 }
 
 export const WelcomeScreen = observer(function WelcomeScreen() {
-  const navigation = useNavigation()
-  const nextScreen = () => navigation.navigate("demo")
+  const [lastMessage, setLastMessage] = React.useState<SocketMessage>(null)
+  const [canGoBack, setCanGoBack] = React.useState<boolean>(false)
+  const [sending, setSending] = React.useState(false)
+  const [connectionStatus, setConnectionStatus] = React.useState<SocketStatus>("CONNECTING")
 
+  const updateLastMessage = (msg: SocketMessage) => {
+    const hasBackOptions =
+      msg?.message?.quick_replies?.filter((el) => el.payload === "on_go_back").length > 0
+    if (hasBackOptions) {
+      setCanGoBack(true)
+    } else {
+      setCanGoBack(false)
+    }
+    setLastMessage(msg)
+  }
+
+  const pointToLastMessage = () =>
+    WS.messagesList$()
+      .pipe(
+        // get the last message from bot only
+        map((data) => data.filter((msg) => msg.from === "BOT")),
+        map((data) => data[data.length - 1]),
+      )
+      .subscribe((msg) => {
+        setSending(false)
+        setLastMessage(null)
+        updateLastMessage(msg)
+      })
+
+  const initFlow = () => {
+    WS.onRestart()
+    welcomeSent = 1
+    setSending(false)
+  }
+  const forceReconnect = (force) => {
+    WS.tryToReconnect(force)
+    welcomeSent = 0
+    setSending(false)
+  }
+
+  const sendUserMessage = (msg) => {
+    const currentMessageList = WS.messagesList()
+    const lastMessage = currentMessageList[currentMessageList.length - 1]
+    if (lastMessage.from === "BOT") {
+      // only replay if last message was from bot
+      WS.sendMessage(msg)
+      setSending(true)
+    }
+  }
+
+  React.useEffect(() => {
+    /**
+     * Start convo
+     */
+    WS.connectionStatus$().subscribe((status) => {
+      if (status === "OPEN" && connectionStatus === "CONNECTING" && welcomeSent === 0) {
+        initFlow()
+      }
+      console.log("CURRENTSTATE", status)
+      setConnectionStatus(status)
+    })
+    /**
+     * Listen for last message
+     */
+    pointToLastMessage()
+  }, [])
+
+  const renderMessageByType = (message: SocketMessage) => {
+    if (message.message.quick_replies && message.message.quick_replies.length > 0) {
+      return (
+        <RenderQuickReplies
+          message={message}
+          isSending={sending}
+          onReply={(msg) => sendUserMessage(msg)}
+        />
+      )
+    } else {
+      return (
+        <RenderTextInput
+          message={message}
+          isSending={sending}
+          onReply={(msg) => sendUserMessage(msg)}
+        />
+      )
+    }
+  }
+
+  if (connectionStatus === "CLOSED" || connectionStatus === "CLOSING") {
+    return (
+      <ConnectionError
+        tryToReconnect={(force) => forceReconnect(force)}
+        showReconnect={connectionStatus === "CLOSED"}
+      />
+    )
+  }
   return (
-    <View testID="WelcomeScreen" style={FULL}>
-      <Wallpaper />
-      <Screen style={CONTAINER} preset="scroll" backgroundColor={color.transparent}>
-        <Header headerTx="welcomeScreen.poweredBy" style={HEADER} titleStyle={HEADER_TITLE} />
-        <Text style={TITLE_WRAPPER}>
-          <Text style={TITLE} text="Your new app, " />
-          <Text style={ALMOST} text="almost" />
-          <Text style={TITLE} text="!" />
-        </Text>
-        <Text style={TITLE} preset="header" tx="welcomeScreen.readyForLaunch" />
-        <Image source={bowserLogo} style={BOWSER} />
-        <Text style={CONTENT}>
-          This probably isn't what your app is going to look like. Unless your designer handed you
-          this screen and, in that case, congrats! You're ready to ship.
-        </Text>
-        <Text style={CONTENT}>
-          For everyone else, this is where you'll see a live preview of your fully functioning app
-          using Ignite.
-        </Text>
-      </Screen>
-      <SafeAreaView style={FOOTER}>
-        <View style={FOOTER_CONTENT}>
-          <Button
-            testID="next-screen-button"
-            style={CONTINUE}
-            textStyle={CONTINUE_TEXT}
-            tx="welcomeScreen.continue"
-            onPress={nextScreen}
+    <Screen style={ROOT_SCREEN} preset="fixed" statusBar="dark-content">
+      {WS && WS.messagesList().length > 2 ? (
+        <>
+          <Header
+            renderLeft={() => {
+              if (canGoBack) {
+                return <GoBackButton onBack={() => sendUserMessage("on_go_back")} />
+              } else {
+                return <View style={VIEW_HOLDER} />
+              }
+            }}
+            renderRight={() => (
+              <RestartFlow
+                onRestart={() => {
+                  WS.onRestart()
+                }}
+              />
+            )}
           />
-        </View>
-      </SafeAreaView>
-    </View>
+          <View style={IMAGE_HOLDER}>
+            <Image resizeMode="contain" style={LEFT_SMALL_LOGO} source={require("./logo.png")} />
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={SPLASH_HOLDER}>
+            <Image
+              source={require("./splash_icon.png")}
+              resizeMode="contain"
+              style={SPLASH_IMAGE}
+            />
+          </View>
+        </>
+      )}
+
+      <ImageBackground
+        source={require("./page-bg.png")}
+        style={PAGE_BACKGROUND_HOLDER}
+        resizeMode="contain"
+      />
+      {lastMessage && lastMessage.message ? (
+        renderMessageByType(lastMessage)
+      ) : (
+        <ConnectionError tryToReconnect={() => initFlow()} />
+      )}
+    </Screen>
   )
 })

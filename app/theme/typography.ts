@@ -1,3 +1,4 @@
+import I18n from "i18n-js"
 import { Platform } from "react-native"
 
 /**
@@ -13,16 +14,20 @@ import { Platform } from "react-native"
  *
  * The various styles of fonts are defined in the <Text /> component.
  */
+
+const fontFamilyIOS = "Neo Sans Arabic"
+const fontFamilyAndroid = "neo_sans_arabic_regular"
+
 export const typography = {
   /**
    * The primary font.  Used in most places.
    */
-  primary: Platform.select({ ios: "Helvetica", android: "normal" }),
+  primary: Platform.select({ ios: fontFamilyIOS, android: fontFamilyAndroid }),
 
   /**
    * An alternate font used for perhaps titles and stuff.
    */
-  secondary: Platform.select({ ios: "Arial", android: "sans-serif" }),
+  secondary: Platform.select({ ios: fontFamilyIOS, android: fontFamilyAndroid }),
 
   /**
    * Lets get fancy with a monospace font!

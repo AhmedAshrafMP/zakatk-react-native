@@ -94,7 +94,7 @@ export function useNavigationPersistence(storage: any, persistenceKey: string) {
   const [isRestoringNavigationState, setIsRestoringNavigationState] = useState(true)
 
   const routeNameRef = useRef()
-  const onNavigationStateChange = state => {
+  const onNavigationStateChange = (state) => {
     const previousRouteName = routeNameRef.current
     const currentRouteName = getActiveRouteName(state)
 
@@ -113,7 +113,7 @@ export function useNavigationPersistence(storage: any, persistenceKey: string) {
   const restoreState = useCallback(async () => {
     try {
       const state = await storage.load(persistenceKey)
-      if (state) setInitialNavigationState(state)
+      if (state) setInitialNavigationState(null)
     } finally {
       setIsRestoringNavigationState(false)
     }

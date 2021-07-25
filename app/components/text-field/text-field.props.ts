@@ -37,4 +37,6 @@ export interface TextFieldProps extends TextInputProps {
   preset?: "default"
 
   forwardedRef?: any
+
+  type: string | "MONEY" | "NUMBER" | "TEXT"
 }
