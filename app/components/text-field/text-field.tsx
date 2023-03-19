@@ -63,7 +63,6 @@ export function TextField(props: TextFieldProps) {
 
   return (
     <View style={containerStyle}>
-      <Text preset="fieldLabel" tx={labelTx} text={label} style={LABEL_STYLE} />
       {type === "MONEY" && (
         <CurrencyInput
           placeholder={actualPlaceholder}

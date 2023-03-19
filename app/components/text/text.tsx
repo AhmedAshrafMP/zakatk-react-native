@@ -21,7 +21,7 @@ export function Text(props: TextProps) {
   const style = mergeAll(flatten([presets[preset] || presets.default, styleOverride]))
 
   return (
-    <ReactNativeText {...rest} style={style}>
+    <ReactNativeText {...rest} editable={false} selectTextOnFocus={false} style={style}>
       {content}
     </ReactNativeText>
   )

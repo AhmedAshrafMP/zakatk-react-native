@@ -3,6 +3,7 @@ import * as React from "react"
 import { Image, ImageStyle, TextStyle, TouchableOpacity, ViewStyle } from "react-native"
 import { Text } from "../"
 import { spacing } from "../../theme"
+import { palette } from "../../theme/palette"
 
 const CONTAINER: ViewStyle = {
   flexDirection: "row",
@@ -12,6 +13,7 @@ const CONTAINER: ViewStyle = {
 
 const TEXT: TextStyle = {
   fontSize: 16,
+  color: palette.angry,
 }
 const BACK_ICON: ImageStyle = {
   height: 16,
@@ -35,13 +37,7 @@ export const GoBackButton = observer(function GoBackButton(props: GoBackButtonPr
   return (
     <TouchableOpacity style={CONTAINER} onPress={() => onBack()}>
       <Image source={require("./Bitmap.png")} style={BACK_ICON} resizeMode="contain" />
-      <Text
-        preset="default"
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        style={TEXT}
-        text="الخطوة السابقة"
-      />
+      <Text preset="default" numberOfLines={1} adjustsFontSizeToFit style={TEXT} text="رجوع" />
     </TouchableOpacity>
   )
 })

@@ -84,6 +84,8 @@ export const RenderQuickReplies = observer(function RenderQuickReplies(
 ) {
   const { style, message, onReply, isSending } = props
 
+  console.log()
+
   return (
     <View style={[CONTAINER, style]}>
       <ScrollView
@@ -91,7 +93,11 @@ export const RenderQuickReplies = observer(function RenderQuickReplies(
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={TEXT_CONTAINER}
       >
-        <ReadMoreText text={`${message.message.text}`} textStyle={TEXT_STYLE} />
+        <ReadMoreText
+          text={`${message.message.text}`}
+          attachments={message.message.attachments}
+          textStyle={TEXT_STYLE}
+        />
       </ScrollView>
       <View style={BUTTONS_GROUP_VIEW}>
         <RenderButtonGroup message={message} onReply={onReply} />

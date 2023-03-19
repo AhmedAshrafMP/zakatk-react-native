@@ -39,16 +39,16 @@ export const ConnectionError = observer(function ConnectionError(props: Connecti
 
       {showReconnect ? (
         <>
-          <Text preset="fieldLabel" text="حدث خطأ اثناء محاوله الاتصال. برجاء اعاده المحاوله" />
+          <Text preset="fieldLabel" text="حدث خطأ اثناء محاوله الاتصال. برجاء اعادة المحاوله" />
           <View style={SAP} />
           <Button
-            text="محاوله اعاده الاتصال"
+            text="محاوله اعادة الاتصال"
             onPress={() => tryToReconnect && tryToReconnect(true)}
           />
         </>
       ) : (
         <>
-          <Text preset="fieldLabel" text="جاري محاوله اعاده الاتصال" />
+          <Text preset="fieldLabel" text="جاري محاوله اعادة الاتصال" />
           <ActivityIndicator />
         </>
       )}

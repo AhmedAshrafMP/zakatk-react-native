@@ -21,61 +21,68 @@ const readMoreStyle: TextStyle = {
   padding: spacing[2],
 }
 
+const fiqehResearch: TextStyle = {
+  color: palette.white,
+  fontSize: 16,
+  backgroundColor: palette.defaultLight,
+  width: "100%",
+  textAlign: "center",
+  padding: spacing[2],
+}
+
 export interface ReadMoreTextProps {
   /**
    * An optional style override useful for padding & margin.
    */
   textStyle?: TextStyle
+  style?: ViewStyle,
   text: string
+  nid?: string
+  attachments: any[]
 }
 
 /**
  * Describe your component here
  */
 
-export const ReadMoreText = ({ text, textStyle }: ReadMoreTextProps) => {
+const AlwaysVisibleNodes = ["NODE_030", "NODE_000", "NODE_014", "NODE_041", "NODE_040"]
+
+export const ReadMoreText = ({ text, textStyle, attachments }: ReadMoreTextProps) => {
   const [showMoreButton, setShowMoreButton] = React.useState(false)
   const [textShown, setTextShown] = React.useState(false)
-  const [numLines, setNumLines] = React.useState(undefined)
 
   const toggleTextShown = () => {
     setTextShown(!textShown)
+    setShowMoreButton(!showMoreButton)
   }
 
   React.useEffect(() => {
-    setNumLines(textShown ? undefined : 5)
-  }, [textShown])
+    if (attachments[0] && AlwaysVisibleNodes.includes(attachments[0].title)) {
+      console.log("[ReadMoreText] AlwaysVisibleNodes", attachments[0].title)
+      return
+    }
+    const txtLines = text.split("\n")
+    if (txtLines.length > 1 && text.split("\n")[0].length > 0) {
+      setShowMoreButton(true)
+    }
+  }, [text])
 
-  const onTextLayout = React.useCallback(
-    (e) => {
-      if (e.nativeEvent.lines.length > 5 && !textShown) {
-        setShowMoreButton(true)
-        setNumLines(5)
-      }
-    },
-    [textShown],
-  )
-
+  const firstLine = text.split("\n")[0]
+  const lineCount = text.split("\n").length
+  console.log("[linecount]", lineCount)
   return (
     <>
-      <Text
-        onTextLayout={onTextLayout}
-        numberOfLines={numLines}
-        style={[textStyle, TEXT_STYLE]}
-        ellipsizeMode="tail"
-        onPress={() => numLines >= 5 && toggleTextShown()}
-        selectable
-      >
-        {text}
+      <Text style={[textStyle, TEXT_STYLE]} ellipsizeMode="tail" selectable>
+        {showMoreButton ? firstLine : text}
       </Text>
 
       {!!showMoreButton && (
         <Text
           preset="fieldLabel"
           onPress={toggleTextShown}
-          style={textShown ? { opacity: 0 } : readMoreStyle}
+          style={lineCount < 4 ? readMoreStyle : fiqehResearch}
         >
-          {textShown ? "عرض اقل" : "عرض المزيد"}
+          {lineCount < 4 ? "عرض المزيد" : "مباحث الفقه"}
         </Text>
       )}
     </>

@@ -49,6 +49,16 @@ const INPUT_STYLE: TextStyle = {
   textAlign: "left",
 }
 
+const BUTTON_HOLDER: ViewStyle = {
+  flexDirection: "row",
+  width: "100%",
+  height: 70,
+  alignContent: "center",
+  alignItems: "center",
+}
+const BUTTON_BIG: ViewStyle = { flex: 3, marginHorizontal: 4 }
+const BUTTON_SMALL: ViewStyle = { flex: 1, marginHorizontal: 4 }
+
 export interface RenderTextInputProps {
   /**
    * An optional style override useful for padding & margin.
@@ -94,8 +104,6 @@ export const RenderTextInput = observer(function RenderTextInput(props: RenderTe
     }
   }
 
-  console.log(viewType, inputType)
-
   return (
     <View style={[CONTAINER, style]}>
       <ScrollView
@@ -103,7 +111,11 @@ export const RenderTextInput = observer(function RenderTextInput(props: RenderTe
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={TEXT_CONTAINER}
       >
-        <ReadMoreText text={`${message.message.text}`} textStyle={TEXT_STYLE} />
+        <ReadMoreText
+          text={`${message.message.text}`}
+          attachments={message.message.attachments}
+          textStyle={TEXT_STYLE}
+        />
       </ScrollView>
       <KeyboardAvoidingView>
         {viewType === "INPUT" && (
@@ -118,12 +130,21 @@ export const RenderTextInput = observer(function RenderTextInput(props: RenderTe
         )}
         {viewType === "CALENDAR" && <RenderCalendars onValueChange={(v) => setCurrentValue(v)} />}
         {viewType === "DEFAULT" && <View />}
-        <Button
-          disabled={!currentValue || currentValue.length < 1 || isSending}
-          style={QR_BUTTON}
-          text={"ادخال"}
-          onPress={() => onReply(currentValue)}
-        />
+        <View style={BUTTON_HOLDER}>
+          <View style={BUTTON_BIG}>
+            <Button
+              disabled={!currentValue || currentValue.length < 1 || isSending}
+              style={QR_BUTTON}
+              text={"ادخال"}
+              onPress={() => onReply(currentValue)}
+            />
+          </View>
+          {viewType === "INPUT" && (
+            <View style={BUTTON_SMALL}>
+              <Button style={QR_BUTTON} text={"لا يوجد"} onPress={() => onReply(`0`)} />
+            </View>
+          )}
+        </View>
       </KeyboardAvoidingView>
       <SafeAreaView />
     </View>

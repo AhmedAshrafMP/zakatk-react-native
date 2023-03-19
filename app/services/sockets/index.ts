@@ -46,12 +46,18 @@ export interface QuickReply {
 }
 export interface BotkitMessageQR {
   attachment?: BotkitDefaultAttachment[] | any[]
+  attachments?: BotkitDefaultAttachment[] | any[]
   quick_replies?: QuickReply[]
   text: string
   type: "MESSAGE"
 }
 export interface BotkitMessageInput {
   attachment?:
+    | BotkitDefaultAttachment[]
+    | BotkitAttachmentInput[]
+    | BotkitAttachmentCalendar[]
+    | any[]
+  attachments?:
     | BotkitDefaultAttachment[]
     | BotkitAttachmentInput[]
     | BotkitAttachmentCalendar[]
@@ -81,7 +87,7 @@ interface BotkitUser {
 export class BotkitSockets implements BotkitSocketsType {
   _rootStore: RootStore
   _retries: number
-  failedTrials: number
+  _failedTrials: number
   _user: BotkitUser
 
   _socket: WebSocket
@@ -100,7 +106,7 @@ export class BotkitSockets implements BotkitSocketsType {
 
   constructor() {
     this._retries = 5
-    this.failedTrials = 1
+    this._failedTrials = 1
 
     this.initUser()
     this.initObs()
@@ -130,9 +136,9 @@ export class BotkitSockets implements BotkitSocketsType {
   }
 
   initSocket(): WebSocket | null {
-    if (this._retries > this.failedTrials) {
+    if (this._retries > this._failedTrials) {
       if (__DEV__) {
-        this._socket = new WebSocket("ws://localhost:3000")
+        this._socket = new WebSocket("ws://167.99.141.120")
       } else {
         this._socket = new WebSocket("ws://167.99.141.120")
       }
@@ -200,7 +206,7 @@ export class BotkitSockets implements BotkitSocketsType {
   _OnSocketOpen() {
     this.onConnectionStatusChange("OPEN")
     this._stopReconnectTrials()
-    this.failedTrials = 1
+    this._failedTrials = 1
     // this._messages$.next([])
     // this._socket.send(
     //   JSON.stringify({
@@ -213,12 +219,12 @@ export class BotkitSockets implements BotkitSocketsType {
   }
 
   _OnSocketClose(reason: WebSocketCloseEvent) {
-    if (this.failedTrials === this._retries) {
+    if (this._failedTrials === this._retries) {
       this.onConnectionStatusChange("CLOSED")
     } else {
       this.trialInterval = setTimeout(() => {
         this.tryToReconnect(false)
-        this.failedTrials++
+        this._failedTrials++
       }, 5000)
     }
 
@@ -242,11 +248,11 @@ export class BotkitSockets implements BotkitSocketsType {
   trialInterval
   tryToReconnect(force: boolean): void {
     if (force) {
-      this.failedTrials = 1
+      this._failedTrials = 1
     }
     this.initSocket()
 
-    console.log("TryingToReconnect trial <" + this.failedTrials + ">")
+    console.log("TryingToReconnect trial <" + this._failedTrials + ">")
   }
 
   _stopReconnectTrials() {

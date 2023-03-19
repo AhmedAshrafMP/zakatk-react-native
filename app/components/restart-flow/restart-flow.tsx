@@ -46,7 +46,7 @@ export const RestartFlow = observer(function RestartFlow(props: RestartFlowProps
 
   return (
     <TouchableOpacity style={CONTAINER} onPress={() => confirmRestart()}>
-      <Text preset="default" style={TEXT} text="اعادة" />
+      <Text preset="default" style={TEXT} text="خروج" />
       <Image source={require("./Bitmap.png")} style={BACK_ICON} resizeMode="contain" />
     </TouchableOpacity>
   )
