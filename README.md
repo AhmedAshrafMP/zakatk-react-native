@@ -1,6 +1,10 @@
 # Zkatak
 
+![](./app/screens/welcome-screen/logo.png)
+
+
 الكود المصدري لتطبيق زكاتك النسخه التجريبيه
+
 
 ```bash
 ignite-project
