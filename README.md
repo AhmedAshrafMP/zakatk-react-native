@@ -1,9 +1,7 @@
 # Zkatak
-<p align="right" width="100%">
-    This text is also aligned to the right.<br>
-    <img width="33%" src="https://i.stack.imgur.com/RJj4x.png">
+<p align="center" width="100%">
+    <img width="33%" src="./app/screens/welcome-screen/logo.png">
 </p>
-![](./app/screens/welcome-screen/logo.png)
 
 
 الكود المصدري لتطبيق زكاتك النسخه التجريبيه
